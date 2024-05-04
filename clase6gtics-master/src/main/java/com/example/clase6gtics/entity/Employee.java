@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -22,8 +24,8 @@ public class Employee {
     private String firstname;
     private String title;
     private String titleofcourtesy;
-    private Date birthdate;
-    private Date hiredate;
+    private String birthdate;
+    private String hiredate;
     private String address;
     private String city;
     private String region;

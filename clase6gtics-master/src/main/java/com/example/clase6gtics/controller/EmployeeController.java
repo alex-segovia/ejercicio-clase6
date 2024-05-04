@@ -5,10 +5,7 @@ import com.example.clase6gtics.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.text.ParseException;
@@ -35,8 +32,9 @@ public class EmployeeController {
     }
 
     @GetMapping("/new")
-    public String nuevoEmpleadoFrm(Model model) {
+    public String nuevoEmpleadoFrm(Model model, @ModelAttribute("employee") Employee employee) {
         model.addAttribute("listaJefes", getListaJefes());
+        model.addAttribute("tipo",false);
         return "employee/newFrm";
     }
 
@@ -50,30 +48,26 @@ public class EmployeeController {
     }
 
     @PostMapping("/save")
-    public String guardarEmpleado(Employee employee,
-                                  @RequestParam("birthdateStr") String birthdateStr,
-                                  @RequestParam("hiredateStr") String hiredateStr) {
-
-        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-        try {
-            employee.setBirthdate(formatter.parse(birthdateStr));
-            employee.setHiredate(formatter.parse(hiredateStr));
-        } catch (ParseException e) {
-            e.printStackTrace();
+    public String guardarEmpleado(RedirectAttributes attr, @ModelAttribute("employee") Employee employee) {
+        if (employee.getId() == 0) {
+            attr.addFlashAttribute("msg", "Empleado creado exitosamente");
+        } else {
+            attr.addFlashAttribute("msg", "Empleado actualizado exitosamente");
         }
-
         employeeRepository.save(employee);
         return "redirect:/employee";
     }
 
     @GetMapping("/edit")
-    public String editarEmpleado(Model model, @RequestParam("id") int id) {
-        Optional<Employee> optional = employeeRepository.findById(id);
+    public String editarEmpleado(@ModelAttribute("employee") Employee employee, Model model, @RequestParam("id") int id) {
+        Optional<Employee> optEmployee = employeeRepository.findById(id);
 
-        if (optional.isPresent()) {
-            model.addAttribute("employee", optional.get());
+        if (optEmployee.isPresent()) {
+            employee = optEmployee.get();
+            model.addAttribute("employee", employee);
             model.addAttribute("listaJefes", getListaJefes());
-            return "employee/editFrm";
+            model.addAttribute("tipo",true);
+            return "employee/newFrm";
         } else {
             return "redirect:/employee";
         }
